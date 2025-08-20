@@ -10,7 +10,7 @@ interface SketchState {
   activeSketchId: string | null
   
   // 스케치 도구 모드
-  sketchMode: 'select' | 'line' | 'circle' | 'rectangle' | null
+  sketchMode: 'select' | 'line' | 'circle' | 'rectangle' | 'dimension' | 'constraint' | null
   
   // 스케치 배열 getter
   getSketchesArray: () => Sketch[]

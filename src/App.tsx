@@ -9,6 +9,8 @@ import { PrimitiveType } from './types/scene'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import BooleanTools from './components/BooleanTools'
 import { useBooleanOperations } from './hooks/useBooleanOperations'
+import ModelingTools from './components/ModelingTools'
+import { useModelingOperations } from './hooks/useModelingOperations'
 
 function App() {
   const addObject = useSceneStore((state) => state.addObject)
@@ -52,6 +54,9 @@ function App() {
   
   // Boolean 연산 Hook
   const { performBooleanOperation } = useBooleanOperations()
+  
+  // Modeling 연산 Hook
+  const { performModelingOperation } = useModelingOperations()
 
   const handleCreateObject = (type: PrimitiveType) => {
     addObject(type)
@@ -599,6 +604,9 @@ function App() {
 
           {/* Boolean 연산 도구 */}
           <BooleanTools onPerformOperation={performBooleanOperation} />
+          
+          {/* 고급 모델링 도구 */}
+          <ModelingTools onPerformOperation={performModelingOperation} />
 
           {/* 생성 도구 */}
           <div className="mb-6">
