@@ -38,6 +38,8 @@ function App() {
   const activateSketch = useSketchStore((state) => state.activateSketch)
   const sketchMode = useSketchStore((state) => state.sketchMode)
   const setSketchMode = useSketchStore((state) => state.setSketchMode)
+  const addDimension = useSketchStore((state) => state.addDimension)
+  const addConstraint = useSketchStore((state) => state.addConstraint)
   
   const objects = getObjectsArray()
   const selectedObject = objects.find(obj => obj.id === selectedObjectId)
@@ -339,12 +341,124 @@ function App() {
                       사각형
                     </button>
                     <button
+                      onClick={() => setSketchMode('dimension')}
+                      className={`px-2 py-1.5 text-xs rounded ${
+                        sketchMode === 'dimension' ? 'bg-green-600 text-white' : 'bg-white hover:bg-gray-100'
+                      }`}
+                    >
+                      치수
+                    </button>
+                    <button
+                      onClick={() => setSketchMode('constraint')}
+                      className={`px-2 py-1.5 text-xs rounded ${
+                        sketchMode === 'constraint' ? 'bg-purple-600 text-white' : 'bg-white hover:bg-gray-100'
+                      }`}
+                    >
+                      구속조건
+                    </button>
+                    <button
                       onClick={() => activateSketch(null)}
-                      className="px-2 py-1.5 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded"
+                      className="px-2 py-1.5 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded col-span-2"
                     >
                       종료
                     </button>
                   </div>
+                  
+                  {/* 치수 도구 상세 */}
+                  {sketchMode === 'dimension' && (
+                    <div className="mt-2 p-2 bg-green-50 rounded">
+                      <div className="text-xs font-medium text-green-700 mb-1">치수 타입</div>
+                      <div className="grid grid-cols-2 gap-1">
+                        <button 
+                          onClick={() => {
+                            // 테스트용 거리 치수 추가
+                            if (activeSketchId) {
+                              addDimension(activeSketchId, {
+                                type: 'distance',
+                                entities: [], // 실제로는 선택된 엔티티들
+                                value: 10.0,
+                                label: '10.00',
+                                position: [5, 5], // 임시 위치
+                                isReference: false
+                              })
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-white hover:bg-gray-100 rounded"
+                        >
+                          거리
+                        </button>
+                        <button className="px-2 py-1 text-xs bg-white hover:bg-gray-100 rounded">
+                          각도
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* 구속조건 도구 상세 */}
+                  {sketchMode === 'constraint' && (
+                    <div className="mt-2 p-2 bg-purple-50 rounded">
+                      <div className="text-xs font-medium text-purple-700 mb-1">구속조건 타입</div>
+                      <div className="grid grid-cols-2 gap-1">
+                        <button 
+                          onClick={() => {
+                            // 테스트용 일치 구속조건 추가
+                            if (activeSketchId) {
+                              addConstraint(activeSketchId, {
+                                type: 'coincident',
+                                entities: [], // 실제로는 선택된 엔티티들
+                                value: undefined
+                              })
+                            }
+                          }}
+                          className="px-1 py-1 text-xs bg-white hover:bg-gray-100 rounded"
+                        >
+                          일치
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (activeSketchId) {
+                              addConstraint(activeSketchId, {
+                                type: 'parallel',
+                                entities: [],
+                                value: undefined
+                              })
+                            }
+                          }}
+                          className="px-1 py-1 text-xs bg-white hover:bg-gray-100 rounded"
+                        >
+                          평행
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (activeSketchId) {
+                              addConstraint(activeSketchId, {
+                                type: 'perpendicular',
+                                entities: [],
+                                value: undefined
+                              })
+                            }
+                          }}
+                          className="px-1 py-1 text-xs bg-white hover:bg-gray-100 rounded"
+                        >
+                          수직
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (activeSketchId) {
+                              addConstraint(activeSketchId, {
+                                type: 'horizontal',
+                                entities: [],
+                                value: undefined
+                              })
+                            }
+                          }}
+                          className="px-1 py-1 text-xs bg-white hover:bg-gray-100 rounded"
+                        >
+                          수평
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               

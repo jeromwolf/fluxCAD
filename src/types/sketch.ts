@@ -41,11 +41,25 @@ export interface SketchConstraint {
   value?: number
 }
 
+// 치수 타입 정의
+export type DimensionType = 'distance' | 'radius' | 'diameter' | 'angle'
+
+export interface SketchDimension {
+  id: string
+  type: DimensionType
+  entities: string[] // Entity IDs or point indices
+  value: number
+  label: string
+  position: [number, number] // 2D position on sketch plane for label
+  isReference: boolean // true면 참조 치수 (편집 불가)
+}
+
 export interface Sketch {
   id: string
   name: string
   plane: SketchPlaneData
   entities: SketchEntity[]
   constraints: SketchConstraint[]
+  dimensions: SketchDimension[]
   isActive: boolean
 }

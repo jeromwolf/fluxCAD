@@ -5,6 +5,7 @@ import { useThree } from '@react-three/fiber'
 import { Sketch } from '@/types/sketch'
 import { useSketchStore } from '@/store/sketchStore'
 import SketchEntity from './SketchEntity'
+import SketchDimensionComponent from './SketchDimension'
 
 interface SketchPlaneProps {
   sketch: Sketch
@@ -238,6 +239,17 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
           planeUp={plane.up}
         />
       )}
+      
+      {/* 치수 렌더링 */}
+      {sketch.dimensions.map((dimension) => (
+        <SketchDimensionComponent
+          key={dimension.id}
+          dimension={dimension}
+          planeNormal={plane.normal}
+          planeOrigin={plane.origin}
+          planeUp={plane.up}
+        />
+      ))}
     </group>
   )
 }
