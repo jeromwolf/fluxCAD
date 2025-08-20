@@ -11,9 +11,13 @@ export default function BooleanTools({ onPerformOperation }: BooleanToolsProps) 
   const selectedObjectIds = useBooleanStore((state) => state.selectedObjectIds)
   const operationMode = useBooleanStore((state) => state.operationMode)
   const setOperationMode = useBooleanStore((state) => state.setOperationMode)
-  const objects = useSceneStore((state) => state.getObjectsArray())
+  const getObjectsArray = useSceneStore((state) => state.getObjectsArray)
 
-  const selectedObjects = objects.filter(obj => selectedObjectIds.includes(obj.id))
+  const objects = React.useMemo(() => getObjectsArray(), [getObjectsArray])
+  const selectedObjects = React.useMemo(
+    () => objects.filter(obj => selectedObjectIds.includes(obj.id)),
+    [objects, selectedObjectIds]
+  )
   const canPerformOperation = selectedObjectIds.length >= 2
 
   const operations: Array<{

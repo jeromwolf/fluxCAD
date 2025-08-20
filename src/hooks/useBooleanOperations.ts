@@ -14,7 +14,7 @@ export function useBooleanOperations() {
   const addOperation = useBooleanStore((state) => state.addOperation)
   const clearSelection = useBooleanStore((state) => state.clearSelection)
   
-  const objects = useSceneStore((state) => state.getObjectsArray())
+  const getObjectsArray = useSceneStore((state) => state.getObjectsArray)
   const addObject = useSceneStore((state) => state.addObject)
   const deleteObject = useSceneStore((state) => state.deleteObject)
 
@@ -24,6 +24,7 @@ export function useBooleanOperations() {
       return false
     }
 
+    const objects = getObjectsArray()
     const objectA = objects.find(obj => obj.id === selectedObjectIds[0])
     const objectB = objects.find(obj => obj.id === selectedObjectIds[1])
 
@@ -106,7 +107,7 @@ export function useBooleanOperations() {
       console.error('Boolean operation error:', error)
       return false
     }
-  }, [selectedObjectIds, objects, addObject, deleteObject, addOperation, clearSelection])
+  }, [selectedObjectIds, getObjectsArray, addObject, deleteObject, addOperation, clearSelection])
 
   return {
     performBooleanOperation,
