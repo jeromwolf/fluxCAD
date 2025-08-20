@@ -9,6 +9,30 @@ interface SceneObjectProps {
 }
 
 export default function SceneObject({ object, isSelected, onClick }: SceneObjectProps) {
+  // 커스텀 지오메트리가 있는 경우 (extruded, revolved 등)
+  if (object.customGeometry) {
+    return (
+      <group onClick={onClick}>
+        <mesh
+          position={object.position}
+          rotation={object.rotation}
+          scale={object.scale}
+          castShadow
+          receiveShadow
+          geometry={object.customGeometry}
+          material={object.customMaterial || new THREE.MeshStandardMaterial({ color: isSelected ? '#facc15' : object.color })}
+        />
+        {isSelected && (
+          <lineSegments position={object.position} rotation={object.rotation} scale={object.scale}>
+            <edgesGeometry args={[object.customGeometry]} />
+            <lineBasicMaterial color="#facc15" linewidth={2} />
+          </lineSegments>
+        )}
+      </group>
+    )
+  }
+
+  // 기본 프리미티브
   return (
     <group onClick={onClick}>
       <mesh

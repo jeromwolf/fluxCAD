@@ -511,6 +511,56 @@ function App() {
               )}
             </div>
           </div>
+          
+          {/* 스케치 → 3D 변환 도구 */}
+          {activeSketchId && sketches.find(s => s.id === activeSketchId)?.entities.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-600 mb-2">스케치 → 3D 변환</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => {
+                    const activeSketch = sketches.find(s => s.id === activeSketchId)
+                    if (activeSketch && activeSketch.entities.length > 0) {
+                      // Extrude 실행
+                      import('@/utils/sketchTo3D').then(({ extrudeSketch }) => {
+                        const mesh = extrudeSketch(
+                          activeSketch.entities,
+                          5.0, // 높이 5
+                          activeSketch.plane.normal,
+                          activeSketch.plane.origin,
+                          activeSketch.plane.up
+                        )
+                        if (mesh) {
+                          // 3D 객체로 추가
+                          addObject('extruded', {
+                            position: [0, 0, 0],
+                            rotation: [0, 0, 0],
+                            scale: [1, 1, 1],
+                            customGeometry: mesh.geometry,
+                            customMaterial: mesh.material,
+                            color: '#2563eb'
+                          })
+                          // 스케치 비활성화
+                          activateSketch(null)
+                        }
+                      })
+                    }
+                  }}
+                  className="px-3 py-2 text-sm bg-green-600 text-white hover:bg-green-700 rounded-md"
+                >
+                  Extrude (돌출)
+                </button>
+                <button 
+                  className="px-3 py-2 text-sm bg-purple-600 text-white hover:bg-purple-700 rounded-md"
+                >
+                  Revolve (회전)
+                </button>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                활성 스케치: {sketches.find(s => s.id === activeSketchId)?.entities.length}개 엔티티
+              </div>
+            </div>
+          )}
 
           {/* 생성 도구 */}
           <div className="mb-6">

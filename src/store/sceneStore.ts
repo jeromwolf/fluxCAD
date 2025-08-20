@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
-import { SceneObject, PrimitiveType } from '@/types/scene'
+import { SceneObject, PrimitiveType, ObjectType } from '@/types/scene'
 import { useHistoryStore } from './historyStore'
 
 interface SceneState {
@@ -17,7 +17,7 @@ interface SceneState {
   getObjectsArray: () => SceneObject[]
   
   // 객체 추가
-  addObject: (type: PrimitiveType, params?: Partial<SceneObject>) => string
+  addObject: (type: ObjectType, params?: Partial<SceneObject>) => string
   
   // 객체 업데이트
   updateObject: (id: string, updates: Partial<SceneObject>) => void
@@ -75,7 +75,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   addObject: (type, params) => {
     const id = uuidv4()
-    const defaultParams = defaultObjectParams[type] || {}
+    const defaultParams = type in defaultObjectParams ? defaultObjectParams[type as PrimitiveType] : {}
     
     // 객체를 랜덤한 위치에 생성
     const randomX = (Math.random() - 0.5) * 8
