@@ -7,6 +7,8 @@ import { useHistoryStore } from './store/historyStore'
 import { useSketchStore } from './store/sketchStore'
 import { PrimitiveType } from './types/scene'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import BooleanTools from './components/BooleanTools'
+import { useBooleanOperations } from './hooks/useBooleanOperations'
 
 function App() {
   const addObject = useSceneStore((state) => state.addObject)
@@ -47,6 +49,9 @@ function App() {
 
   // 키보드 단축키 활성화
   useKeyboardShortcuts()
+  
+  // Boolean 연산 Hook
+  const { performBooleanOperation } = useBooleanOperations()
 
   const handleCreateObject = (type: PrimitiveType) => {
     addObject(type)
@@ -591,6 +596,9 @@ function App() {
               </div>
             </div>
           )}
+
+          {/* Boolean 연산 도구 */}
+          <BooleanTools onPerformOperation={performBooleanOperation} />
 
           {/* 생성 도구 */}
           <div className="mb-6">
