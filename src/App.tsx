@@ -371,15 +371,34 @@ function App() {
                       <div className="grid grid-cols-2 gap-1">
                         <button 
                           onClick={() => {
-                            // 테스트용 거리 치수 추가
+                            // 테스트용 거리 치수 여러 개 추가
                             if (activeSketchId) {
+                              // 첫 번째 치수
                               addDimension(activeSketchId, {
                                 type: 'distance',
-                                entities: [], // 실제로는 선택된 엔티티들
+                                entities: [],
                                 value: 10.0,
                                 label: '10.00',
-                                position: [5, 5], // 임시 위치
+                                position: [3, 3],
                                 isReference: false
+                              })
+                              // 두 번째 치수
+                              addDimension(activeSketchId, {
+                                type: 'distance',
+                                entities: [],
+                                value: 5.5,
+                                label: '5.50',
+                                position: [-3, 4],
+                                isReference: false
+                              })
+                              // 참조 치수
+                              addDimension(activeSketchId, {
+                                type: 'distance',
+                                entities: [],
+                                value: 15.25,
+                                label: '15.25',
+                                position: [0, -3],
+                                isReference: true
                               })
                             }
                           }}
@@ -478,8 +497,12 @@ function App() {
                             sketch.isActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'
                           }`}
                         >
-                          <span>{sketch.name}</span>
-                          <span className="text-gray-500">({sketch.plane.type})</span>
+                          <div className="flex flex-col">
+                            <span>{sketch.name}</span>
+                            <span className="text-gray-500 text-xs">
+                              {sketch.plane.type} | {sketch.entities.length}개 엔티티 | {sketch.dimensions.length}개 치수 | {sketch.constraints.length}개 구속조건
+                            </span>
+                          </div>
                         </div>
                       )
                     })}
