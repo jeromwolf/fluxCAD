@@ -154,11 +154,46 @@ export function revolveSketch(
   planeOrigin: [number, number, number],
   planeUp: [number, number, number]
 ): THREE.Mesh | null {
-  const shape = createShapeFromSketch(entities)
-  if (!shape) return null
-
-  // LatheGeometry용 포인트 추출
-  const points = shape.getPoints(50).map(p => new THREE.Vector2(p.x, p.y))
+  // 단순한 형상 생성 (프로파일)
+  const points: THREE.Vector2[] = []
+  
+  // 첫 번째 원이나 사각형을 프로파일로 사용
+  const firstEntity = entities[0]
+  if (!firstEntity) return null
+  
+  if (firstEntity.type === 'circle' && firstEntity.properties?.radius) {
+    // 원의 경우 반원 프로파일 생성
+    const radius = firstEntity.properties.radius
+    const center = firstEntity.points[0]
+    for (let i = 0; i <= 16; i++) {
+      const angle = (i / 16) * Math.PI
+      points.push(new THREE.Vector2(
+        Math.cos(angle) * radius,
+        center[1] + Math.sin(angle) * radius
+      ))
+    }
+  } else if (firstEntity.type === 'rectangle' && firstEntity.points.length >= 2) {
+    // 사각형의 경우 한쪽 변을 프로파일로 사용
+    const p1 = firstEntity.points[0]
+    const p2 = firstEntity.points[1]
+    const width = Math.abs(p2[0] - p1[0])
+    const height = Math.abs(p2[1] - p1[1])
+    
+    points.push(
+      new THREE.Vector2(0, 0),
+      new THREE.Vector2(width / 2, 0),
+      new THREE.Vector2(width / 2, height),
+      new THREE.Vector2(0, height)
+    )
+  } else {
+    // 기타 형상은 shape를 사용
+    const shape = createShapeFromSketch(entities)
+    if (!shape) return null
+    const shapePoints = shape.getPoints(20)
+    shapePoints.forEach(p => points.push(new THREE.Vector2(Math.abs(p.x), p.y)))
+  }
+  
+  if (points.length < 2) return null
   
   // LatheGeometry 생성
   const geometry = new THREE.LatheGeometry(points, segments, 0, angle)

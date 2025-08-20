@@ -551,6 +551,36 @@ function App() {
                   Extrude (돌출)
                 </button>
                 <button 
+                  onClick={() => {
+                    const activeSketch = sketches.find(s => s.id === activeSketchId)
+                    if (activeSketch && activeSketch.entities.length > 0) {
+                      // Revolve 실행
+                      import('@/utils/sketchTo3D').then(({ revolveSketch }) => {
+                        const mesh = revolveSketch(
+                          activeSketch.entities,
+                          Math.PI * 2, // 360도 회전
+                          32, // 세그먼트 수
+                          'Y', // Y축 중심 회전
+                          activeSketch.plane.normal,
+                          activeSketch.plane.origin,
+                          activeSketch.plane.up
+                        )
+                        if (mesh) {
+                          // 3D 객체로 추가
+                          addObject('revolved', {
+                            position: [0, 0, 0],
+                            rotation: [0, 0, 0],
+                            scale: [1, 1, 1],
+                            customGeometry: mesh.geometry,
+                            customMaterial: mesh.material,
+                            color: '#22c55e'
+                          })
+                          // 스케치 비활성화
+                          activateSketch(null)
+                        }
+                      })
+                    }
+                  }}
                   className="px-3 py-2 text-sm bg-purple-600 text-white hover:bg-purple-700 rounded-md"
                 >
                   Revolve (회전)
