@@ -30,21 +30,21 @@ export default function BooleanTools({ onPerformOperation }: BooleanToolsProps) 
     {
       type: 'union',
       label: 'Union (합집합)',
-      icon: '⊔',
+      icon: '∪',
       color: 'bg-blue-600 hover:bg-blue-700',
       description: '두 객체를 합칩니다'
     },
     {
       type: 'subtract',
       label: 'Subtract (차집합)',
-      icon: '⊖',
+      icon: '−',
       color: 'bg-red-600 hover:bg-red-700',
       description: '첫 번째에서 두 번째를 뺍니다'
     },
     {
       type: 'intersect',
       label: 'Intersect (교집합)',
-      icon: '⊗',
+      icon: '∩',
       color: 'bg-purple-600 hover:bg-purple-700',
       description: '겹치는 부분만 남깁니다'
     }

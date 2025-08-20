@@ -5,9 +5,13 @@ import { useSceneStore } from '@/store/sceneStore'
 import { BooleanOperationType } from '@/types/boolean'
 import { booleanOperationManager } from '@/services/boolean/BooleanOperationManager'
 import { ThreeCSGProvider } from '@/services/boolean/providers/ThreeCSGProvider'
+import { ThreeBVHCSGProvider } from '@/services/boolean/providers/ThreeBVHCSGProvider'
 
 // 프로바이더 초기화
 booleanOperationManager.registerProvider(new ThreeCSGProvider())
+booleanOperationManager.registerProvider(new ThreeBVHCSGProvider())
+// 실제 CSG 프로바이더를 활성화
+booleanOperationManager.setActiveProvider('three-bvh-csg')
 
 export function useBooleanOperations() {
   const selectedObjectIds = useBooleanStore((state) => state.selectedObjectIds)
@@ -95,9 +99,12 @@ export function useBooleanOperations() {
         resultObjectId: resultId
       })
 
-      // 원본 객체 삭제 (옵션)
-      deleteObject(objectA.id)
-      deleteObject(objectB.id)
+      // 원본 객체 삭제 (옵션 - 나중에 설정으로 변경 가능)
+      const deleteOriginals = true // 나중에 설정으로 변경
+      if (deleteOriginals) {
+        deleteObject(objectA.id)
+        deleteObject(objectB.id)
+      }
 
       // 선택 초기화
       clearSelection()
