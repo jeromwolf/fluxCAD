@@ -15,7 +15,6 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
   const { plane } = sketch
   const planeRef = useRef<THREE.Mesh>(null)
   
-  console.log('SketchPlane component rendering:', sketch.id, sketch.plane)
   
   const sketchMode = useSketchStore((state) => state.sketchMode)
   const addEntity = useSketchStore((state) => state.addEntity)
@@ -71,7 +70,6 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
   
   // 마우스 이벤트 처리
   const handlePointerDown = (event: any) => {
-    console.log('Pointer down:', { isActive: sketch.isActive, sketchMode, eventPoint: event.point })
     
     if (!sketch.isActive || !sketchMode || sketchMode === 'select') {
       onClick?.()
@@ -80,7 +78,6 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
     
     event.stopPropagation()
     const point2D = worldToPlane2D(event.point)
-    console.log('Point 2D:', point2D)
     
     switch (sketchMode) {
       case 'line':
@@ -90,7 +87,6 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
         } else {
           // 선 완성
           const firstPoint = tempPoints[0]
-          console.log('Creating line:', { firstPoint, secondPoint: point2D })
           addEntity(sketch.id, {
             type: 'line',
             points: [firstPoint, point2D]
@@ -153,11 +149,6 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
   
   return (
     <group position={plane.origin}>
-      {/* 디버그용 박스 */}
-      <mesh position={[0, 0, 0.1]}>
-        <boxGeometry args={[2, 2, 0.2]} />
-        <meshBasicMaterial color="red" />
-      </mesh>
       
       {/* 평면 메시 */}
       <Plane
@@ -167,7 +158,6 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onClick={(e) => {
-          console.log('Mesh clicked!', e)
           e.stopPropagation()
         }}
       >
@@ -216,7 +206,6 @@ export default function SketchPlane({ sketch, onClick }: SketchPlaneProps) {
       
       {/* 스케치 엔티티 렌더링 */}
       {sketch.entities.map((entity) => {
-        console.log('Rendering entity:', entity)
         return (
           <SketchEntity
             key={entity.id}

@@ -7,7 +7,6 @@ export default function SketchRenderer() {
   const activateSketch = useSketchStore((state) => state.activateSketch)
   
   const sketchArray = Array.from(sketches.values())
-  console.log('SketchRenderer - rendering sketches:', sketchArray)
   
   if (sketchArray.length === 0) {
     return null

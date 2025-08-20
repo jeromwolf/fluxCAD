@@ -282,9 +282,7 @@ function App() {
               <div className="grid grid-cols-3 gap-1">
                 <button
                   onClick={() => {
-                    // console.log('Creating XY sketch...')
                     const id = createSketch('XY')
-                    // console.log('Created sketch with id:', id)
                     activateSketch(id)
                   }}
                   className="px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded"
@@ -356,12 +354,10 @@ function App() {
                   <div className="text-xs text-gray-500 mb-1">스케치 목록 ({sketches.length}개)</div>
                   <div className="space-y-1">
                     {sketches.map((sketch) => {
-                      console.log('Sketch in list:', sketch)
                       return (
                         <div
                           key={sketch.id}
                           onClick={() => {
-                            console.log('Activating sketch:', sketch.id)
                             activateSketch(sketch.id)
                           }}
                           className={`px-2 py-1 text-xs rounded cursor-pointer flex justify-between items-center ${
