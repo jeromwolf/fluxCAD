@@ -23,13 +23,8 @@ export default function ModelingTools({ onPerformOperation }: ModelingToolsProps
   const setPatternSettings = useModelingStore((state) => state.setPatternSettings)
   
   const selectedObjectId = useSceneStore((state) => state.selectedObjectId)
-  const objects = useSceneStore((state) => state.getObjectsArray())
-  const selectedObject = objects.find(obj => obj.id === selectedObjectId)
-  
-  // 디버깅용
-  console.log('ModelingTools - selectedObjectId:', selectedObjectId)
-  console.log('ModelingTools - objects:', objects)
-  console.log('ModelingTools - selectedObject:', selectedObject)
+  const objects = useSceneStore((state) => Array.from(state.objects.values()))
+  const selectedObject = selectedObjectId ? objects.find(obj => obj.id === selectedObjectId) : null
 
   const tools: Array<{
     type: ModelingOperationType
