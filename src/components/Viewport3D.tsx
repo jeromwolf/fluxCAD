@@ -1,4 +1,4 @@
-import React, { Suspense, useRef } from 'react'
+import React, { Suspense, useRef, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Grid, GizmoHelper, GizmoViewport, Stats, PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
@@ -7,17 +7,29 @@ import type { OrbitControls as OrbitControlsType } from 'three-stdlib'
 import SceneRenderer from './SceneRenderer'
 import TransformControls from './TransformControls'
 import SketchRenderer from './SketchRenderer'
+import MeasurementTools from './MeasurementTools'
+import LightingSystem from './LightingSystem'
+import PostProcessing, { analyzeSceneForPostProcessing, postProcessingPresets, getOptimalQuality, qualityPresets } from './PostProcessing'
 import { useAppStore } from '@/store/appStore'
 import { useSceneStore } from '@/store/sceneStore'
 
 export default function Viewport3D() {
   const controlsRef = useRef<OrbitControlsType>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera>(null)
+  const [renderingQuality, setRenderingQuality] = useState(getOptimalQuality())
+  const [autoPostProcessing, setAutoPostProcessing] = useState(true)
+  const [showRenderingControls, setShowRenderingControls] = useState(false)
+  
   const useCAD = useAppStore((state) => state.useCAD)
   const setUseCAD = useAppStore((state) => state.setUseCAD)
   const selectObject = useSceneStore((state) => state.selectObject)
   const viewportSettings = useAppStore((state) => state.viewportSettings)
   const snapSettings = useAppStore((state) => state.snapSettings)
+  const getObjectsArray = useSceneStore((state) => state.getObjectsArray)
+  
+  const objects = getObjectsArray()
+  const autoPreset = analyzeSceneForPostProcessing(objects)
+  const qualitySettings = qualityPresets[renderingQuality]
 
   const setCameraView = (preset: keyof typeof cameraPresets) => {
     if (!controlsRef.current || !cameraRef.current) return
@@ -34,7 +46,12 @@ export default function Viewport3D() {
   return (
     <div className="w-full h-full relative">
       <Canvas
-        gl={{ preserveDrawingBuffer: true, antialias: true }}
+        gl={{ 
+          preserveDrawingBuffer: true, 
+          antialias: qualitySettings.multisampling > 0,
+          powerPreference: renderingQuality === 'ultra' ? 'high-performance' : 'default',
+          alpha: false
+        }}
         shadows
         onPointerMissed={handleCanvasClick}
       >
@@ -45,12 +62,12 @@ export default function Viewport3D() {
           fov={50}
         />
         <color attach="background" args={['#f5f5f5']} />
-        <ambientLight intensity={0.5} />
-        <directionalLight
-          position={[10, 10, 5]}
-          intensity={1}
-          castShadow
-          shadow-mapSize={[2048, 2048]}
+        
+        {/* 고급 조명 시스템 */}
+        <LightingSystem
+          enableShadows={true}
+          enableEnvironment={true}
+          preset="studio"
         />
         
         <Suspense fallback={null}>
@@ -62,6 +79,22 @@ export default function Viewport3D() {
           
           {/* Transform 컨트롤 */}
           <TransformControls />
+          
+          {/* 측정 도구 */}
+          <MeasurementTools />
+          
+          {/* 후처리 효과 */}
+          <PostProcessing
+            {...(autoPostProcessing ? postProcessingPresets[autoPreset] : {
+              enableBloom: true,
+              enableSSAO: true,
+              enableToneMapping: true,
+              bloomIntensity: 0.4,
+              bloomThreshold: 0.85,
+              ssaoIntensity: 0.5,
+              ssaoRadius: 0.1
+            })}
+          />
           
           {/* 그리드 */}
           {viewportSettings.showGrid && (
@@ -84,9 +117,20 @@ export default function Viewport3D() {
             makeDefault
             enableDamping
             dampingFactor={0.05}
-            minDistance={2}
-            maxDistance={50}
+            minDistance={0.1}
+            maxDistance={1000}
             maxPolarAngle={Math.PI / 2}
+            mouseButtons={{
+              LEFT: THREE.MOUSE.ROTATE,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: THREE.MOUSE.PAN
+            }}
+            touches={{
+              ONE: THREE.TOUCH.ROTATE,
+              TWO: THREE.TOUCH.DOLLY_PAN
+            }}
+            enableZoom={true}
+            zoomSpeed={1.2}
           />
           
           {/* 축 표시 기즈모 */}
@@ -140,6 +184,94 @@ export default function Viewport3D() {
           평면
         </button>
       </div>
+      
+      {/* 렌더링 품질 및 효과 제어 */}
+      <div className="absolute bottom-4 right-4">
+        <button
+          onClick={() => setShowRenderingControls(!showRenderingControls)}
+          className="bg-white border border-gray-300 rounded px-3 py-2 text-sm hover:bg-gray-50 mb-2 block w-full"
+        >
+          🎨 렌더링 설정
+        </button>
+        
+        {showRenderingControls && (
+          <div className="bg-white border border-gray-300 rounded p-4 shadow-lg space-y-3 min-w-[200px]">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">품질</label>
+              <select
+                value={renderingQuality}
+                onChange={(e) => setRenderingQuality(e.target.value as keyof typeof qualityPresets)}
+                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+              >
+                <option value="low">낮음 (빠름)</option>
+                <option value="medium">보통</option>
+                <option value="high">높음</option>
+                <option value="ultra">최고 (느림)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="flex items-center text-xs text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={autoPostProcessing}
+                  onChange={(e) => setAutoPostProcessing(e.target.checked)}
+                  className="mr-2 rounded"
+                />
+                자동 후처리 효과
+              </label>
+              {autoPostProcessing && (
+                <div className="text-xs text-gray-500 mt-1">
+                  현재: {postProcessingPresets[autoPreset].description}
+                </div>
+              )}
+            </div>
+            
+            <div className="text-xs text-gray-500 pt-2 border-t">
+              객체 {objects.length}개 • {renderingQuality} 품질
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// 렌더링 성능 모니터링 컴포넌트
+export function RenderingPerformanceMonitor() {
+  const [fps, setFps] = useState(60)
+  const [frameTime, setFrameTime] = useState(16.67)
+  
+  useEffect(() => {
+    let lastTime = performance.now()
+    let frameCount = 0
+    let lastFpsUpdate = performance.now()
+    
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastTime
+      setFrameTime(deltaTime)
+      
+      frameCount++
+      if (currentTime - lastFpsUpdate >= 1000) {
+        setFps(Math.round(frameCount * 1000 / (currentTime - lastFpsUpdate)))
+        frameCount = 0
+        lastFpsUpdate = currentTime
+      }
+      
+      lastTime = currentTime
+      requestAnimationFrame(animate)
+    }
+    
+    requestAnimationFrame(animate)
+    
+    return () => {
+      // cleanup은 자동으로 됨
+    }
+  }, [])
+  
+  return (
+    <div className="absolute top-4 left-4 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs font-mono">
+      {fps} FPS • {frameTime.toFixed(1)}ms
     </div>
   )
 }

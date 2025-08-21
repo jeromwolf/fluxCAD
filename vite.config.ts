@@ -26,6 +26,15 @@ export default defineConfig({
   server: {
     port: 3009,
     open: true,
+    // WASM 파일을 위한 MIME 타입 설정
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'credentialless',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+    fs: {
+      // node_modules 접근 허용
+      allow: ['..']
+    }
   },
   build: {
     outDir: 'dist',
@@ -33,5 +42,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['opencascade.js', 'occt-import-js']
-  }
+  },
+  assetsInclude: ['**/*.wasm']
 })

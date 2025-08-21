@@ -72,16 +72,50 @@ export default function FileMenu({ className }: FileMenuProps) {
       const result = await fileIOManager.importFile(file)
       
       if (result.success && result.objects) {
-        result.objects.forEach(obj => {
+        // 기존 객체들의 바운딩 박스를 계산하여 최대 X 좌표 찾기
+        const existingObjects = getObjectsArray()
+        let maxX = 0
+        
+        existingObjects.forEach(obj => {
+          if (obj.position) {
+            // 객체의 대략적인 크기를 고려 (기본값 10)
+            const objSize = obj.dimensions ? Math.max(...Object.values(obj.dimensions)) : 10
+            const rightEdge = obj.position[0] + objSize
+            maxX = Math.max(maxX, rightEdge)
+          }
+        })
+        
+        // 새 객체들을 기존 객체들의 오른쪽에 배치
+        const spacing = 20 // 객체 간 간격
+        const baseOffset = maxX + spacing
+        
+        result.objects.forEach((obj, index) => {
+          // 위치 조정 - 기존 객체와 충분히 떨어뜨림
+          if (!obj.position) {
+            obj.position = [0, 0, 0]
+          }
+          
+          // X축으로 이동 (기존 객체들의 오른쪽)
+          obj.position[0] += baseOffset
+          
+          // 같은 파일 내 여러 객체는 Z축으로 분리
+          if (result.objects.length > 1) {
+            obj.position[2] += index * 15
+          }
+          
           addObject(obj.type, obj)
         })
+        
         const fileType = fileIOManager.guessFileType(file.name) || 'unknown'
-        alert(`${result.objects.length}개의 객체를 ${fileType.toUpperCase()} 파일에서 가져왔습니다.`)
+        alert(`${result.objects.length}개의 객체를 ${fileType.toUpperCase()} 파일에서 가져왔습니다.\n\n팁: 마우스 휠로 확대/축소, 왼쪽 드래그로 회전`)
         
         // 경고 메시지가 있으면 표시
         if (result.warnings && result.warnings.length > 0) {
           console.warn('Import warnings:', result.warnings)
         }
+        
+        // 카메라를 조정하여 모든 객체 보기 (선택사항)
+        // TODO: 모든 객체를 볼 수 있도록 카메라 위치 자동 조정
       } else {
         alert(`가져오기 실패: ${result.error}`)
       }
@@ -187,6 +221,22 @@ export default function FileMenu({ className }: FileMenuProps) {
                 </span>
               </button>
               
+              {/* 모든 객체 삭제 */}
+              <button
+                onClick={() => {
+                  if (getObjectsArray().length > 0) {
+                    if (confirm('모든 객체를 삭제하시겠습니까?')) {
+                      clearScene()
+                    }
+                  }
+                  setIsOpen(false)
+                }}
+                disabled={getObjectsArray().length === 0}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
+              >
+                모든 객체 삭제
+              </button>
+              
               <div className="border-t border-gray-100"></div>
               
               {/* 가져오기 */}
@@ -275,8 +325,86 @@ export default function FileMenu({ className }: FileMenuProps) {
                 </button>
               )}
               
+              {/* glTF 내보내기 */}
+              <button
+                onClick={() => {
+                  handleExport(FileType.GLTF)
+                  setIsOpen(false)
+                }}
+                disabled={isExporting || getObjectsArray().length === 0}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
+              >
+                <span className="flex items-center justify-between">
+                  glTF (웹 표준 3D)
+                  {isExporting && <span className="text-xs">처리 중...</span>}
+                </span>
+              </button>
+              
+              {/* 선택된 객체만 glTF로 내보내기 */}
+              {selectedObjectId && (
+                <button
+                  onClick={() => {
+                    handleExport(FileType.GLTF, true)
+                    setIsOpen(false)
+                  }}
+                  disabled={isExporting}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
+                >
+                  <span className="flex items-center justify-between">
+                    선택된 객체만 glTF로
+                    {isExporting && <span className="text-xs">처리 중...</span>}
+                  </span>
+                </button>
+              )}
+              
+              {/* 일괄 내보내기 */}
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500">
+                일괄 내보내기
+              </div>
+              
+              <button
+                onClick={async () => {
+                  setIsExporting(true)
+                  try {
+                    const objects = getObjectsArray()
+                    if (objects.length === 0) {
+                      alert('내보낼 객체가 없습니다.')
+                      return
+                    }
+                    
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
+                    const formats = [FileType.STL, FileType.OBJ, FileType.GLTF]
+                    
+                    for (const format of formats) {
+                      const filename = `fluxcad-export-${timestamp}.${format}`
+                      const result = await fileIOManager.exportFile(objects, format, filename)
+                      if (!result.success) {
+                        console.error(`Failed to export ${format}:`, result.error)
+                      }
+                    }
+                    
+                    alert('모든 표준 포맷으로 내보내기 완료!\n(STL, OBJ, glTF)')
+                  } catch (error) {
+                    console.error('Batch export error:', error)
+                    alert('일괄 내보내기 중 오류가 발생했습니다.')
+                  } finally {
+                    setIsExporting(false)
+                  }
+                  setIsOpen(false)
+                }}
+                disabled={isExporting || getObjectsArray().length === 0}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400 font-medium"
+              >
+                <span className="flex items-center justify-between">
+                  모든 표준 포맷으로 내보내기
+                  {isExporting && <span className="text-xs">처리 중...</span>}
+                </span>
+              </button>
+              
               <div className="px-4 py-2 text-xs text-gray-500">
-                가져오기 지원: STL, OBJ, STEP
+                📁 가져오기: STL, OBJ, STEP, glTF<br/>
+                💾 내보내기: STL, OBJ, glTF, FluxCAD<br/>
+                🔄 다른 CAD 소프트웨어 호환
               </div>
               
               <div className="border-t border-gray-100"></div>

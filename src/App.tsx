@@ -12,6 +12,8 @@ import { useBooleanOperations } from './hooks/useBooleanOperations'
 import ModelingTools from './components/ModelingTools'
 import { useModelingOperations } from './hooks/useModelingOperations'
 import FileMenu from './components/FileMenu'
+import MaterialLibrary from './components/MaterialLibrary'
+import MeasurementTools from './components/MeasurementTools'
 
 function App() {
   const addObject = useSceneStore((state) => state.addObject)
@@ -31,6 +33,9 @@ function App() {
   const setToolMode = useAppStore((state) => state.setToolMode)
   const transformMode = useAppStore((state) => state.transformMode)
   const setTransformMode = useAppStore((state) => state.setTransformMode)
+  const measurementMode = useAppStore((state) => state.measurementMode)
+  const setMeasurementMode = useAppStore((state) => state.setMeasurementMode)
+  const [showMaterialLibrary, setShowMaterialLibrary] = React.useState(false)
   const snapSettings = useAppStore((state) => state.snapSettings)
   const updateSnapSettings = useAppStore((state) => state.updateSnapSettings)
   
@@ -129,9 +134,22 @@ function App() {
               <button className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                 보기
               </button>
-              <button className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                도구
-              </button>
+              <div className="relative group">
+                <button className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                  도구
+                </button>
+                <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 invisible group-hover:visible">
+                  <div className="py-1">
+                    <button
+                      onClick={() => setShowMaterialLibrary(true)}
+                      disabled={!selectedObject}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
+                    >
+                      재질 라이브러리
+                    </button>
+                  </div>
+                </div>
+              </div>
             </nav>
           </div>
         </div>
@@ -178,6 +196,48 @@ function App() {
                     </select>
                   </label>
                 </>
+              )}
+            </div>
+          </div>
+
+          {/* 측정 도구 */}
+          <div className="mb-6">
+            <h2 className="text-sm font-semibold text-gray-600 mb-2">측정 도구</h2>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  setMeasurementMode(measurementMode === 'distance' ? 'none' : 'distance')
+                }}
+                className={`w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 ${
+                  measurementMode === 'distance'
+                    ? 'bg-green-100 text-green-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 3m0 0l3-3m-3 3v8m13-11l-3 3m0 0l3 3m-3-3H9" />
+                </svg>
+                거리 측정
+              </button>
+              <button
+                onClick={() => {
+                  setMeasurementMode(measurementMode === 'angle' ? 'none' : 'angle')
+                }}
+                className={`w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 ${
+                  measurementMode === 'angle'
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19.5l-5.5-5.5m0 0l5.5-5.5m-5.5 5.5h16" />
+                </svg>
+                각도 측정
+              </button>
+              {measurementMode !== 'none' && (
+                <div className="text-xs text-gray-600 bg-yellow-50 p-2 rounded">
+                  💡 점을 클릭하여 측정, ESC로 취소
+                </div>
               )}
             </div>
           </div>
@@ -242,6 +302,9 @@ function App() {
             {toolMode === 'transform' && selectedObject && (
               <div className="space-y-2 p-3 bg-gray-50 rounded-md">
                 <div className="text-xs font-medium text-gray-500 mb-2">변형 도구</div>
+                <div className="text-xs text-gray-600 bg-yellow-50 p-2 rounded mb-2">
+                  💡 축을 드래그하여 이동, 평면을 드래그하여 2D 이동
+                </div>
                 <button
                   onClick={() => setTransformMode('translate')}
                   className={`w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 ${
@@ -254,6 +317,7 @@ function App() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
                   </svg>
                   이동 (Move)
+                  <span className="text-xs text-gray-500 ml-auto">G</span>
                 </button>
                 <button
                   onClick={() => setTransformMode('rotate')}
@@ -734,6 +798,7 @@ function App() {
         
         <div className="flex-1 bg-gray-100 relative">
           <Viewport3D />
+          <MeasurementTools />
           
           {/* 스냅 상태 표시 */}
           {snapSettings.enabled && (
@@ -764,6 +829,14 @@ function App() {
                 )}
               </div>
             </div>
+          )}
+          
+          {/* 재질 라이브러리 모달 */}
+          {showMaterialLibrary && (
+            <MaterialLibrary 
+              selectedObjectId={selectedObjectId}
+              onClose={() => setShowMaterialLibrary(false)}
+            />
           )}
         </div>
       </main>

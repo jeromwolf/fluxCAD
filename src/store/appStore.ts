@@ -8,6 +8,8 @@ interface SnapSettings {
   snapSize: number
 }
 
+export type MeasurementMode = 'none' | 'distance' | 'angle'
+
 interface AppState {
   // CAD 모드 여부
   useCAD: boolean
@@ -24,6 +26,10 @@ interface AppState {
   // Transform 모드
   transformMode: 'translate' | 'rotate' | 'scale'
   setTransformMode: (mode: 'translate' | 'rotate' | 'scale') => void
+  
+  // 측정 모드
+  measurementMode: MeasurementMode
+  setMeasurementMode: (mode: MeasurementMode) => void
   
   // 생성할 객체 타입
   createType: 'box' | 'sphere' | 'cylinder' | 'cone'
@@ -54,6 +60,9 @@ export const useAppStore = create<AppState>((set) => ({
   
   transformMode: 'translate',
   setTransformMode: (transformMode) => set({ transformMode }),
+  
+  measurementMode: 'none',
+  setMeasurementMode: (measurementMode) => set({ measurementMode }),
   
   createType: 'box',
   setCreateType: (createType) => set({ createType }),

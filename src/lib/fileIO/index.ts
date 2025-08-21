@@ -8,6 +8,7 @@ import { STLHandler } from './formats/STLHandler'
 import { OBJHandler } from './formats/OBJHandler'
 import { FluxCADHandler } from './formats/FluxCADHandler'
 import { STEPHandler } from './formats/STEPHandler'
+import { GLTFHandler } from './formats/GLTFHandler'
 
 import { fileIOManager } from './FileIOManager'
 
@@ -24,6 +25,9 @@ export function initializeFileIO(): void {
   
   // STEP 핸들러 등록
   fileIOManager.registerHandler(new STEPHandler())
+  
+  // GLTF 핸들러 등록
+  fileIOManager.registerHandler(new GLTFHandler())
   
   console.log('File I/O system initialized')
 }

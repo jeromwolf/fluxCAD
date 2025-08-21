@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEP Import Test</title>
+</head>
+<body>
+    <h1>STEP Import Test</h1>
+    <input type="file" id="fileInput" accept=".step,.stp">
+    <pre id="output"></pre>
+
+    <script type="module">
+        // Import occt-import-js directly to test
+        import occtimportjs from '/node_modules/occt-import-js/dist/occt-import-js.js';
+        
+        const output = document.getElementById('output');
+        const fileInput = document.getElementById('fileInput');
+        
+        async function log(message) {
+            output.textContent += message + '\n';
+            console.log(message);
+        }
+        
+        // Initialize occt-import-js
+        log('Initializing occt-import-js...');
+        
+        try {
+            const occt = await occtimportjs();
+            log('occt-import-js initialized successfully');
+            log('Available methods: ' + Object.keys(occt).join(', '));
+            
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                log('\nReading file: ' + file.name);
+                
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const fileContent = new Uint8Array(arrayBuffer);
+                    
+                    log('File size: ' + fileContent.length + ' bytes');
+                    
+                    const params = {
+                        linearUnit: 'millimeter',
+                        linearDeflectionType: 'bounding_box_ratio',
+                        linearDeflection: 0.001,
+                        angularDeflection: 0.1
+                    };
+                    
+                    log('Parsing STEP file...');
+                    const result = occt.ReadStepFile(fileContent, params);
+                    
+                    log('Parse result: ' + JSON.stringify(result, null, 2));
+                    
+                    if (result.success) {
+                        log('SUCCESS! Found ' + result.meshes.length + ' meshes');
+                    } else {
+                        log('FAILED to parse STEP file');
+                    }
+                } catch (error) {
+                    log('ERROR: ' + error.message);
+                    console.error(error);
+                }
+            });
+        } catch (error) {
+            log('Failed to initialize occt-import-js: ' + error.message);
+            console.error(error);
+        }
+    </script>
+</body>
+</html>

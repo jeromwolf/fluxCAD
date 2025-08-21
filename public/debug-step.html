@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEP Import Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #file-input {
+            margin: 20px 0;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>STEP Import Debug</h1>
+    
+    <h2>Test 1: Direct Script Load</h2>
+    <button onclick="testDirectLoad()">Test Direct Load</button>
+    
+    <h2>Test 2: Module Import</h2>
+    <button onclick="testModuleImport()">Test Module Import</button>
+    
+    <h2>Test 3: File Import</h2>
+    <input type="file" id="file-input" accept=".step,.stp">
+    
+    <h2>Output:</h2>
+    <pre id="output"></pre>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = '') {
+            const timestamp = new Date().toISOString().substr(11, 8);
+            const className = type ? ` class="${type}"` : '';
+            output.innerHTML += `<div${className}>[${timestamp}] ${message}</div>`;
+            console.log(message);
+        }
+        
+        async function testDirectLoad() {
+            try {
+                log('Testing direct script load...');
+                
+                // Load script
+                const script = document.createElement('script');
+                script.src = '/node_modules/occt-import-js/dist/occt-import-js.js';
+                
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+                
+                log('Script loaded, checking window.occtimportjs...');
+                
+                if (window.occtimportjs) {
+                    log('window.occtimportjs found!', 'success');
+                    log('Type: ' + typeof window.occtimportjs);
+                    
+                    // Initialize
+                    log('Initializing OCCT...');
+                    const occt = await window.occtimportjs({
+                        locateFile: (filename) => {
+                            log('locateFile called for: ' + filename);
+                            if (filename.endsWith('.wasm')) {
+                                return '/occt-import-js.wasm';
+                            }
+                            return filename;
+                        }
+                    });
+                    
+                    log('OCCT initialized!', 'success');
+                    log('Methods: ' + Object.keys(occt).join(', '));
+                    
+                    // Save to window for later use
+                    window._occt = occt;
+                } else {
+                    log('window.occtimportjs NOT found!', 'error');
+                }
+            } catch (error) {
+                log('Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        async function testModuleImport() {
+            try {
+                log('Testing module import...');
+                
+                const module = await import('/node_modules/occt-import-js/dist/occt-import-js.js');
+                log('Module loaded: ' + JSON.stringify(Object.keys(module)));
+                
+                const initFunc = module.default || module.occtimportjs || module;
+                if (typeof initFunc === 'function') {
+                    log('Found init function, calling...');
+                    const occt = await initFunc({
+                        locateFile: (filename) => {
+                            if (filename.endsWith('.wasm')) {
+                                return '/occt-import-js.wasm';
+                            }
+                            return filename;
+                        }
+                    });
+                    log('OCCT initialized via module!', 'success');
+                    log('Methods: ' + Object.keys(occt).join(', '));
+                } else {
+                    log('No init function found in module', 'error');
+                }
+            } catch (error) {
+                log('Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // File input handler
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            try {
+                log(`\nTesting file import: ${file.name}`);
+                
+                // Make sure OCCT is initialized
+                if (!window._occt) {
+                    log('OCCT not initialized, running direct load first...');
+                    await testDirectLoad();
+                }
+                
+                if (!window._occt) {
+                    log('Failed to initialize OCCT', 'error');
+                    return;
+                }
+                
+                const occt = window._occt;
+                
+                // Read file
+                log('Reading file...');
+                const arrayBuffer = await file.arrayBuffer();
+                const fileContent = new Uint8Array(arrayBuffer);
+                log(`File size: ${fileContent.length} bytes`);
+                
+                // Parse STEP
+                log('Parsing STEP file...');
+                const params = {
+                    linearUnit: 'millimeter',
+                    linearDeflectionType: 'bounding_box_ratio',
+                    linearDeflection: 0.001,
+                    angularDeflection: 0.1
+                };
+                
+                const result = occt.ReadStepFile(fileContent, params);
+                
+                log('Parse result:', 'success');
+                log(JSON.stringify(result, null, 2));
+                
+                if (result.success) {
+                    log(`SUCCESS! Found ${result.meshes.length} meshes`, 'success');
+                } else {
+                    log('Parse failed', 'error');
+                }
+            } catch (error) {
+                log('Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        });
+        
+        // Auto-load for convenience
+        window.addEventListener('load', () => {
+            log('Page loaded, ready for testing');
+        });
+    </script>
+</body>
+</html>

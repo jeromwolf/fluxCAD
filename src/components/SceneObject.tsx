@@ -14,6 +14,7 @@ export default function SceneObject({ object, isSelected, onClick }: SceneObject
     return (
       <group onClick={onClick}>
         <mesh
+          name={object.id}
           position={object.position}
           rotation={object.rotation}
           scale={object.scale}
@@ -36,6 +37,7 @@ export default function SceneObject({ object, isSelected, onClick }: SceneObject
   return (
     <group onClick={onClick}>
       <mesh
+        name={object.id}
         position={object.position}
         rotation={object.rotation}
         scale={object.scale}
