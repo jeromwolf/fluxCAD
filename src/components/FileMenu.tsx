@@ -68,7 +68,13 @@ export default function FileMenu({ className }: FileMenuProps) {
         result.objects.forEach(obj => {
           addObject(obj.type, obj)
         })
-        alert(`${result.objects.length}개의 객체를 가져왔습니다.`)
+        const fileType = fileIOManager.guessFileType(file.name) || 'unknown'
+        alert(`${result.objects.length}개의 객체를 ${fileType.toUpperCase()} 파일에서 가져왔습니다.`)
+        
+        // 경고 메시지가 있으면 표시
+        if (result.warnings && result.warnings.length > 0) {
+          console.warn('Import warnings:', result.warnings)
+        }
       } else {
         alert(`가져오기 실패: ${result.error}`)
       }
@@ -179,13 +185,37 @@ export default function FileMenu({ className }: FileMenuProps) {
                 </button>
               )}
               
-              {/* 향후 추가될 포맷들 */}
+              {/* OBJ 내보내기 */}
               <button
-                disabled
-                className="w-full text-left px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
+                onClick={() => {
+                  handleExport(FileType.OBJ)
+                  setIsOpen(false)
+                }}
+                disabled={isExporting || getObjectsArray().length === 0}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
               >
-                OBJ (준비 중)
+                <span className="flex items-center justify-between">
+                  OBJ (범용 3D)
+                  {isExporting && <span className="text-xs">처리 중...</span>}
+                </span>
               </button>
+              
+              {/* 선택된 객체만 OBJ로 내보내기 */}
+              {selectedObjectId && (
+                <button
+                  onClick={() => {
+                    handleExport(FileType.OBJ, true)
+                    setIsOpen(false)
+                  }}
+                  disabled={isExporting}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
+                >
+                  <span className="flex items-center justify-between">
+                    선택된 객체만 OBJ로
+                    {isExporting && <span className="text-xs">처리 중...</span>}
+                  </span>
+                </button>
+              )}
               
               <button
                 disabled
