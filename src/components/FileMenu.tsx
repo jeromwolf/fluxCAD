@@ -275,12 +275,9 @@ export default function FileMenu({ className }: FileMenuProps) {
                 </button>
               )}
               
-              <button
-                disabled
-                className="w-full text-left px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
-              >
-                STEP (준비 중)
-              </button>
+              <div className="px-4 py-2 text-xs text-gray-500">
+                가져오기 지원: STL, OBJ, STEP
+              </div>
               
               <div className="border-t border-gray-100"></div>
               

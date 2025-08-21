@@ -9,7 +9,8 @@ export enum FileType {
   STEP = 'step',
   IGES = 'iges',
   GLTF = 'gltf',
-  FBX = 'fbx'
+  FBX = 'fbx',
+  BREP = 'brep'
 }
 
 // 파일 정보 인터페이스

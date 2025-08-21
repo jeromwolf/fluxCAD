@@ -32,6 +32,6 @@ export default defineConfig({
     sourcemap: true,
   },
   optimizeDeps: {
-    exclude: ['opencascade.js']
+    exclude: ['opencascade.js', 'occt-import-js']
   }
 })

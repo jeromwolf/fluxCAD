@@ -7,6 +7,7 @@ export * from './core/BaseFormatHandler'
 import { STLHandler } from './formats/STLHandler'
 import { OBJHandler } from './formats/OBJHandler'
 import { FluxCADHandler } from './formats/FluxCADHandler'
+import { STEPHandler } from './formats/STEPHandler'
 
 import { fileIOManager } from './FileIOManager'
 
@@ -20,6 +21,9 @@ export function initializeFileIO(): void {
   
   // FluxCAD 프로젝트 파일 핸들러 등록
   fileIOManager.registerHandler(new FluxCADHandler())
+  
+  // STEP 핸들러 등록
+  fileIOManager.registerHandler(new STEPHandler())
   
   console.log('File I/O system initialized')
 }
