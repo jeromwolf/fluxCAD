@@ -46,29 +46,8 @@ export function createChamferedBox(
   depth: number,
   chamfer: number
 ): THREE.BufferGeometry {
-  const shape = new THREE.Shape()
-  
-  const x = width / 2
-  const y = height / 2
-  const c = Math.min(chamfer, x, y)
-  
-  // 모서리가 깎인 사각형
-  shape.moveTo(-x + c, -y)
-  shape.lineTo(x - c, -y)
-  shape.lineTo(x, -y + c)
-  shape.lineTo(x, y - c)
-  shape.lineTo(x - c, y)
-  shape.lineTo(-x + c, y)
-  shape.lineTo(-x, y - c)
-  shape.lineTo(-x, -y + c)
-  shape.closePath()
-  
-  const extrudeSettings = {
-    depth: depth,
-    bevelEnabled: false
-  }
-  
-  return new THREE.ExtrudeGeometry(shape, extrudeSettings)
+  // 임시로 일반 박스 반환 (디버깅용)
+  return new THREE.BoxGeometry(width, height, depth)
 }
 
 // Shell 구현 (박스의 속을 비우기)
@@ -78,56 +57,12 @@ export function createShelledBox(
   depth: number,
   thickness: number
 ): THREE.BufferGeometry {
-  // 외부 모서리 각도 계산
-  const outerRadius = Math.min(thickness, width/4, height/4, depth/4)
-  const innerRadius = outerRadius * 0.7
-  
-  // 외부 박스 (모서리가 둥근)
-  const outerShape = new THREE.Shape()
-  const x = width / 2
-  const y = height / 2
-  const r = outerRadius
-  
-  outerShape.moveTo(-x + r, -y)
-  outerShape.lineTo(x - r, -y)
-  outerShape.quadraticCurveTo(x, -y, x, -y + r)
-  outerShape.lineTo(x, y - r)
-  outerShape.quadraticCurveTo(x, y, x - r, y)
-  outerShape.lineTo(-x + r, y)
-  outerShape.quadraticCurveTo(-x, y, -x, y - r)
-  outerShape.lineTo(-x, -y + r)
-  outerShape.quadraticCurveTo(-x, -y, -x + r, -y)
-  
-  // 내부 구멍 (hole)
-  const innerX = x - thickness
-  const innerY = y - thickness
-  const ir = innerRadius
-  
-  if (innerX > ir && innerY > ir) {
-    const hole = new THREE.Path()
-    hole.moveTo(-innerX + ir, -innerY)
-    hole.lineTo(innerX - ir, -innerY)
-    hole.quadraticCurveTo(innerX, -innerY, innerX, -innerY + ir)
-    hole.lineTo(innerX, innerY - ir)
-    hole.quadraticCurveTo(innerX, innerY, innerX - ir, innerY)
-    hole.lineTo(-innerX + ir, innerY)
-    hole.quadraticCurveTo(-innerX, innerY, -innerX, innerY - ir)
-    hole.lineTo(-innerX, -innerY + ir)
-    hole.quadraticCurveTo(-innerX, -innerY, -innerX + ir, -innerY)
-    
-    outerShape.holes.push(hole)
-  }
-  
-  const extrudeSettings = {
-    depth: depth - thickness,
-    bevelEnabled: true,
-    bevelSegments: 2,
-    steps: 1,
-    bevelSize: thickness / 2,
-    bevelThickness: thickness / 2
-  }
-  
-  return new THREE.ExtrudeGeometry(outerShape, extrudeSettings)
+  // 임시로 작은 박스 반환 (디버깅용)
+  return new THREE.BoxGeometry(
+    width - thickness * 2,
+    height - thickness * 2,
+    depth - thickness * 2
+  )
 }
 
 // Pattern 생성 (선형 배열)

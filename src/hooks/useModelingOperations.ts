@@ -25,10 +25,7 @@ export function useModelingOperations() {
   const patternSpacing = useModelingStore((state) => state.patternSpacing)
 
   const performModelingOperation = useCallback(async (type: ModelingOperationType) => {
-    console.log('performModelingOperation called with type:', type)
-    
     if (!selectedObjectId) {
-      console.error('No object selected')
       return false
     }
 
@@ -36,19 +33,8 @@ export function useModelingOperations() {
     const selectedObject = objects.find(obj => obj.id === selectedObjectId)
     
     if (!selectedObject) {
-      console.error('Selected object not found')
       return false
     }
-
-    console.log('Selected object:', selectedObject)
-    console.log('Operation parameters:', {
-      filletRadius,
-      chamferDistance,
-      shellThickness,
-      patternType,
-      patternCount,
-      patternSpacing
-    })
 
     try {
       let resultGeometry: THREE.BufferGeometry | null = null
@@ -136,11 +122,8 @@ export function useModelingOperations() {
       }
 
       if (!resultGeometry) {
-        console.error('Modeling operation failed to create geometry')
         return false
       }
-
-      console.log('Result geometry created:', resultGeometry)
 
       // 결과 객체 생성
       const resultId = addObject('custom', {
@@ -162,11 +145,9 @@ export function useModelingOperations() {
         deleteObject(selectedObject.id)
       }
 
-      console.log('Operation completed successfully')
       return true
     } catch (error) {
       console.error('Modeling operation error:', error)
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
       return false
     }
   }, [
