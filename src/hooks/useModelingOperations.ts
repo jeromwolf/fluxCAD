@@ -25,6 +25,8 @@ export function useModelingOperations() {
   const patternSpacing = useModelingStore((state) => state.patternSpacing)
 
   const performModelingOperation = useCallback(async (type: ModelingOperationType) => {
+    console.log('performModelingOperation called with type:', type)
+    
     if (!selectedObjectId) {
       console.error('No object selected')
       return false
@@ -38,6 +40,16 @@ export function useModelingOperations() {
       return false
     }
 
+    console.log('Selected object:', selectedObject)
+    console.log('Operation parameters:', {
+      filletRadius,
+      chamferDistance,
+      shellThickness,
+      patternType,
+      patternCount,
+      patternSpacing
+    })
+
     try {
       let resultGeometry: THREE.BufferGeometry | null = null
       let operationName = ''
@@ -46,7 +58,10 @@ export function useModelingOperations() {
         case 'fillet':
           // 박스인 경우만 간단한 fillet 적용
           if (selectedObject.type === 'box') {
-            resultGeometry = createFilletedBox(2, 2, 2, filletRadius)
+            const width = selectedObject.scale[0] * 2
+            const height = selectedObject.scale[1] * 2
+            const depth = selectedObject.scale[2] * 2
+            resultGeometry = createFilletedBox(width, height, depth, filletRadius)
             operationName = `Filleted_${selectedObject.name}`
           } else {
             console.warn('Fillet is currently only supported for box objects')
@@ -57,7 +72,10 @@ export function useModelingOperations() {
         case 'chamfer':
           // 박스인 경우만 간단한 chamfer 적용
           if (selectedObject.type === 'box') {
-            resultGeometry = createChamferedBox(2, 2, 2, chamferDistance)
+            const width = selectedObject.scale[0] * 2
+            const height = selectedObject.scale[1] * 2
+            const depth = selectedObject.scale[2] * 2
+            resultGeometry = createChamferedBox(width, height, depth, chamferDistance)
             operationName = `Chamfered_${selectedObject.name}`
           } else {
             console.warn('Chamfer is currently only supported for box objects')
@@ -68,7 +86,10 @@ export function useModelingOperations() {
         case 'shell':
           // 박스인 경우만 간단한 shell 적용
           if (selectedObject.type === 'box') {
-            resultGeometry = createShelledBox(2, 2, 2, shellThickness)
+            const width = selectedObject.scale[0] * 2
+            const height = selectedObject.scale[1] * 2
+            const depth = selectedObject.scale[2] * 2
+            resultGeometry = createShelledBox(width, height, depth, shellThickness)
             operationName = `Shelled_${selectedObject.name}`
           } else {
             console.warn('Shell is currently only supported for box objects')
@@ -119,6 +140,8 @@ export function useModelingOperations() {
         return false
       }
 
+      console.log('Result geometry created:', resultGeometry)
+
       // 결과 객체 생성
       const resultId = addObject('custom', {
         name: operationName,
@@ -139,9 +162,11 @@ export function useModelingOperations() {
         deleteObject(selectedObject.id)
       }
 
+      console.log('Operation completed successfully')
       return true
     } catch (error) {
       console.error('Modeling operation error:', error)
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
       return false
     }
   }, [
