@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { createSimpleChamferBox, createSimpleShellBox, safeCreateGeometry } from './geometryHelpers'
 
 // 간단한 Fillet 구현 (박스의 모서리를 둥글게)
 export function createFilletedBox(
@@ -46,8 +47,8 @@ export function createChamferedBox(
   depth: number,
   chamfer: number
 ): THREE.BufferGeometry {
-  // 임시로 일반 박스 반환 (디버깅용)
-  return new THREE.BoxGeometry(width, height, depth)
+  return safeCreateGeometry(() => createSimpleChamferBox(width, height, depth, chamfer)) 
+    || new THREE.BoxGeometry(width, height, depth)
 }
 
 // Shell 구현 (박스의 속을 비우기)
@@ -57,12 +58,8 @@ export function createShelledBox(
   depth: number,
   thickness: number
 ): THREE.BufferGeometry {
-  // 임시로 작은 박스 반환 (디버깅용)
-  return new THREE.BoxGeometry(
-    width - thickness * 2,
-    height - thickness * 2,
-    depth - thickness * 2
-  )
+  return safeCreateGeometry(() => createSimpleShellBox(width, height, depth, thickness))
+    || new THREE.BoxGeometry(width, height, depth)
 }
 
 // Pattern 생성 (선형 배열)
