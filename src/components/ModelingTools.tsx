@@ -23,8 +23,10 @@ export default function ModelingTools({ onPerformOperation }: ModelingToolsProps
   const setPatternSettings = useModelingStore((state) => state.setPatternSettings)
   
   const selectedObjectId = useSceneStore((state) => state.selectedObjectId)
-  const objects = useSceneStore((state) => Array.from(state.objects.values()))
-  const selectedObject = selectedObjectId ? objects.find(obj => obj.id === selectedObjectId) : null
+  const selectedObject = useSceneStore((state) => {
+    if (!state.selectedObjectId) return null
+    return state.objects.get(state.selectedObjectId) || null
+  })
 
   const tools: Array<{
     type: ModelingOperationType
