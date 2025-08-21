@@ -11,6 +11,7 @@ import BooleanTools from './components/BooleanTools'
 import { useBooleanOperations } from './hooks/useBooleanOperations'
 import ModelingTools from './components/ModelingTools'
 import { useModelingOperations } from './hooks/useModelingOperations'
+import FileMenu from './components/FileMenu'
 
 function App() {
   const addObject = useSceneStore((state) => state.addObject)
@@ -71,9 +72,7 @@ function App() {
               <h1 className="text-xl font-semibold text-gray-900">fluxCAD</h1>
             </div>
             <nav className="flex space-x-4">
-              <button className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                파일
-              </button>
+              <FileMenu />
               <div className="relative group">
                 <button className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                   편집
