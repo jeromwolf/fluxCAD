@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 // 간단한 Fillet 구현 (박스의 모서리를 둥글게)
 export function createFilletedBox(
