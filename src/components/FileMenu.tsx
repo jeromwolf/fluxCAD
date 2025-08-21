@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useSceneStore } from '@/store/sceneStore'
 import { useSketchStore } from '@/store/sketchStore'
+import { useProjectStore } from '@/store/projectStore'
 import { fileIOManager, FileType, initializeFileIO } from '@/lib/fileIO'
 
 // 파일 I/O 시스템 초기화
@@ -19,6 +20,12 @@ export default function FileMenu({ className }: FileMenuProps) {
   const addObject = useSceneStore((state) => state.addObject)
   const clearScene = useSceneStore((state) => state.clearScene)
   const selectedObjectId = useSceneStore((state) => state.selectedObjectId)
+  
+  const collectProjectData = useProjectStore((state) => state.collectProjectData)
+  const loadProjectData = useProjectStore((state) => state.loadProjectData)
+  const newProject = useProjectStore((state) => state.newProject)
+  const projectName = useProjectStore((state) => state.projectName)
+  const setProjectInfo = useProjectStore((state) => state.setProjectInfo)
   
   // 내보내기 처리
   const handleExport = async (format: FileType, selectedOnly: boolean = false) => {
@@ -89,9 +96,60 @@ export default function FileMenu({ className }: FileMenuProps) {
   // 새 프로젝트
   const handleNewProject = () => {
     if (getObjectsArray().length > 0) {
-      if (confirm('현재 씬의 모든 객체가 삭제됩니다. 계속하시겠습니까?')) {
-        clearScene()
+      if (confirm('현재 프로젝트의 모든 변경사항이 손실됩니다. 계속하시겠습니까?')) {
+        newProject()
       }
+    } else {
+      newProject()
+    }
+  }
+  
+  // 프로젝트 저장
+  const handleSaveProject = async () => {
+    setIsExporting(true)
+    try {
+      const projectData = collectProjectData()
+      const filename = `${projectName.replace(/\s+/g, '_')}.fluxcad`
+      
+      const result = await fileIOManager.saveProject(projectData, filename)
+      
+      if (!result.success) {
+        alert(`프로젝트 저장 실패: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Save project error:', error)
+      alert('프로젝트 저장 중 오류가 발생했습니다.')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+  
+  // 프로젝트 불러오기
+  const handleLoadProject = async () => {
+    setIsImporting(true)
+    try {
+      const file = await fileIOManager.selectFile('.fluxcad,.flux')
+      if (!file) return
+      
+      if (getObjectsArray().length > 0) {
+        if (!confirm('현재 프로젝트의 모든 변경사항이 손실됩니다. 계속하시겠습니까?')) {
+          return
+        }
+      }
+      
+      const result = await fileIOManager.loadProject(file)
+      
+      if (result.success && result.projectData) {
+        loadProjectData(result.projectData)
+        alert(`프로젝트 "${result.projectData.metadata.name}"을(를) 불러왔습니다.`)
+      } else {
+        alert(`프로젝트 불러오기 실패: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Load project error:', error)
+      alert('프로젝트 불러오기 중 오류가 발생했습니다.')
+    } finally {
+      setIsImporting(false)
     }
   }
   
@@ -228,8 +286,12 @@ export default function FileMenu({ className }: FileMenuProps) {
               
               {/* 프로젝트 저장/불러오기 */}
               <button
-                disabled
-                className="w-full text-left px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
+                onClick={() => {
+                  handleSaveProject()
+                  setIsOpen(false)
+                }}
+                disabled={isExporting}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
               >
                 <span className="flex items-center justify-between">
                   프로젝트 저장
@@ -238,8 +300,12 @@ export default function FileMenu({ className }: FileMenuProps) {
               </button>
               
               <button
-                disabled
-                className="w-full text-left px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
+                onClick={() => {
+                  handleLoadProject()
+                  setIsOpen(false)
+                }}
+                disabled={isImporting}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:text-gray-400"
               >
                 <span className="flex items-center justify-between">
                   프로젝트 열기

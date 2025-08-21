@@ -6,7 +6,7 @@ export * from './core/BaseFormatHandler'
 // 포맷 핸들러들
 import { STLHandler } from './formats/STLHandler'
 import { OBJHandler } from './formats/OBJHandler'
-// import { FluxCADHandler } from './formats/FluxCADHandler'
+import { FluxCADHandler } from './formats/FluxCADHandler'
 
 import { fileIOManager } from './FileIOManager'
 
@@ -18,8 +18,8 @@ export function initializeFileIO(): void {
   // OBJ 핸들러 등록
   fileIOManager.registerHandler(new OBJHandler())
   
-  // FluxCAD 프로젝트 파일 핸들러 등록 (구현 예정)
-  // fileIOManager.registerHandler(new FluxCADHandler())
+  // FluxCAD 프로젝트 파일 핸들러 등록
+  fileIOManager.registerHandler(new FluxCADHandler())
   
   console.log('File I/O system initialized')
 }
