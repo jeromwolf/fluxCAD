@@ -97,9 +97,18 @@ Tests should cover:
 - Real-time sync reliability
 - Browser compatibility
 
-## Current Development Status (Phase 4 - Advanced Features)
+## Current Development Status (Phase 5 - Collaboration)
 
 ### Recently Completed Features
+
+#### Real-time Collaboration System ✅ (Latest Update)
+- **Optional Collaboration Mode**: Toggle between personal and collaborative work
+- **CRDT Synchronization**: Yjs-based conflict-free real-time sync
+- **User Presence**: Live cursors, selection indicators, user list
+- **Real-time Chat**: Integrated messaging system
+- **Network Resilience**: Auto-reconnection, offline mode with sync queue
+- **Performance Optimization**: LOD, Instancing, Frustum Culling for collaborative environments
+- **Server Architecture**: Socket.io + Yjs WebSocket servers
 
 #### Advanced Modeling Tools ✅
 - **Boolean Operations**: Union, Subtraction, Intersection with CSG algorithms
@@ -152,14 +161,36 @@ src/components/
 
 #### Development Commands
 ```bash
-npm run dev        # Development server
-npm run build      # Production build
-npm run typecheck  # TypeScript validation
+npm run dev          # Development server
+npm run build        # Production build
+npm run typecheck    # TypeScript validation
+
+# Collaboration servers
+./start-collaboration.sh  # Start Socket.io + Yjs servers
+./stop-collaboration.sh   # Stop collaboration servers
+./start-all.sh           # Start frontend + collaboration servers
+```
+
+#### Collaboration Components
+```
+src/components/collaboration/
+├── CollaborationPanel.tsx  # Main collaboration UI
+├── UserList.tsx           # Active users display
+├── ChatPanel.tsx          # Real-time messaging
+├── UserCursors.tsx        # 3D cursor visualization
+├── UserSelections.tsx     # Selection highlights
+└── CollaborativeCanvas.tsx # R3F integration
+
+src/store/collaborationStore.ts  # Collaboration state management
+src/utils/collaboration/         # Network and sync utilities
 ```
 
 ### Next Priorities
-1. **Performance Optimization**: LOD, Instancing, Frustum Culling
-2. **Real-time Collaboration**: Multi-user editing system
+1. **Session Recording & Playback**: 협업 세션 녹화 및 재생
+2. **Permission System**: 읽기 전용/편집 권한 관리
+3. **Notification System**: 실시간 알림 (멘션, 변경사항)
+4. **Collaboration Analytics**: 협업 분석 대시보드
+5. **PostProcessing Fix**: Resolve SSAO/N8AO rendering issues
 
 ## Important Notes
 
