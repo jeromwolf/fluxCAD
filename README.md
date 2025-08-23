@@ -4,7 +4,12 @@
 
 ## 🚀 시작하기
 
-### 개발 서버 실행
+### 전체 시스템 실행 (프론트엔드 + 협업 서버)
+```bash
+./start-all.sh
+```
+
+### 개발 서버만 실행
 ```bash
 ./start.sh
 ```
@@ -13,7 +18,17 @@
 npm run dev
 ```
 
-개발 서버는 http://localhost:3009 에서 실행됩니다.
+### 협업 서버만 실행
+```bash
+./start-collaboration.sh
+```
+
+### 협업 서버 종료
+```bash
+./stop-collaboration.sh
+```
+
+개발 서버는 http://localhost:5173 에서 실행됩니다.
 
 ### 프로덕션 빌드
 ```bash
@@ -50,6 +65,7 @@ fluxCAD/
 
 ## 🎯 주요 기능
 
+### 기본 기능
 - ✅ 웹 브라우저에서 실행되는 3D CAD
 - ✅ OpenCascade.js 기반 정밀 모델링
 - ✅ 실시간 3D 렌더링
@@ -57,8 +73,32 @@ fluxCAD/
 - ✅ 객체 선택 및 관리
 - ✅ CAD/Three.js 모드 전환
 
+### 고급 모델링
+- ✅ Boolean 연산 (Union, Subtraction, Intersection)
+- ✅ 고급 작업 (Fillet, Chamfer, Shell, Pattern)
+- ✅ 2D 스케치 시스템
+- ✅ Extrude/Revolve 3D 변환
+
+### 파일 입출력
+- ✅ STL, OBJ, STEP, glTF 가져오기
+- ✅ STL, OBJ, glTF 내보내기
+- ✅ FluxCAD 프로젝트 파일 (.fluxcad)
+
+### 렌더링 시스템
+- ✅ PBR 재질 라이브러리 (20+ 재질)
+- ✅ HDR 환경 조명
+- ✅ 후처리 효과 (SSAO, Bloom, Tone Mapping)
+- ✅ 성능 최적화 시스템
+
+### 협업 기능 (NEW!)
+- ✅ 실시간 다중 사용자 편집
+- ✅ 사용자 커서 및 선택 상태 공유
+- ✅ 실시간 채팅
+- ✅ Yjs CRDT 기반 충돌 없는 동기화
+
 ## 📝 개발 명령어
 
+### 프론트엔드
 ```bash
 # 개발 서버
 npm run dev
@@ -71,6 +111,18 @@ npm run typecheck
 
 # 빌드 프리뷰
 npm run preview
+```
+
+### 협업 서버
+```bash
+# 서버 디렉토리로 이동
+cd server
+
+# Socket.io 서버 실행
+npm start
+
+# Yjs 서버 실행
+npm run yjs
 ```
 
 ## 🔧 시스템 요구사항

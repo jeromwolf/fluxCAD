@@ -13,7 +13,7 @@ import ModelingTools from './components/ModelingTools'
 import { useModelingOperations } from './hooks/useModelingOperations'
 import FileMenu from './components/FileMenu'
 import MaterialLibrary from './components/MaterialLibrary'
-import MeasurementTools from './components/MeasurementTools'
+import CollaborationPanel from './components/collaboration/CollaborationPanel'
 
 function App() {
   const addObject = useSceneStore((state) => state.addObject)
@@ -38,6 +38,8 @@ function App() {
   const [showMaterialLibrary, setShowMaterialLibrary] = React.useState(false)
   const snapSettings = useAppStore((state) => state.snapSettings)
   const updateSnapSettings = useAppStore((state) => state.updateSnapSettings)
+  const collaborationEnabled = useAppStore((state) => state.collaborationEnabled)
+  const setCollaborationEnabled = useAppStore((state) => state.setCollaborationEnabled)
   
   const historyPastLength = useHistoryStore((state) => state.past.length)
   const historyFutureLength = useHistoryStore((state) => state.future.length)
@@ -76,7 +78,18 @@ function App() {
             <div className="flex items-center">
               <h1 className="text-xl font-semibold text-gray-900">fluxCAD</h1>
             </div>
-            <nav className="flex space-x-4">
+            <nav className="flex space-x-4 items-center">
+              {/* 협업 모드 토글 */}
+              <button
+                onClick={() => setCollaborationEnabled(!collaborationEnabled)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  collaborationEnabled
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {collaborationEnabled ? '🌐 협업 모드' : '👤 개인 모드'}
+              </button>
               <FileMenu />
               <div className="relative group">
                 <button className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
@@ -798,7 +811,8 @@ function App() {
         
         <div className="flex-1 bg-gray-100 relative">
           <Viewport3D />
-          <MeasurementTools />
+          {/* 협업 패널 - 협업 모드가 활성화된 경우에만 표시 */}
+          {collaborationEnabled && <CollaborationPanel />}
           
           {/* 스냅 상태 표시 */}
           {snapSettings.enabled && (

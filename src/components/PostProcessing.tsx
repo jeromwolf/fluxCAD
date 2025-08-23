@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Bloom, EffectComposer, SSAO, ToneMapping } from '@react-three/postprocessing'
+import { Bloom, EffectComposer, SSAO, ToneMapping, DepthOfField, N8AO } from '@react-three/postprocessing'
 import { BlendFunction, ToneMappingMode } from 'postprocessing'
 import * as THREE from 'three'
 
@@ -15,7 +15,7 @@ interface PostProcessingProps {
 
 export default function PostProcessing({
   enableBloom = true,
-  enableSSAO = true,
+  enableSSAO = false, // Temporarily disabled
   enableToneMapping = true,
   bloomIntensity = 0.4,
   bloomThreshold = 0.85,
@@ -26,22 +26,15 @@ export default function PostProcessing({
   const effects = useMemo(() => {
     const effectsArray = []
     
-    // SSAO (Screen Space Ambient Occlusion) - 주변광 차폐
+    // N8AO (Screen Space Ambient Occlusion) - 주변광 차폐
+    // N8AO는 SSAO보다 성능이 좋고 NormalPass가 필요없음
     if (enableSSAO) {
       effectsArray.push(
-        <SSAO
-          key="ssao"
-          blendFunction={BlendFunction.MULTIPLY}
-          samples={16}
-          rings={4}
-          distanceThreshold={0.65}
-          distanceFalloff={0.1}
-          rangeThreshold={0.0015}
-          rangeFalloff={0.01}
-          luminanceInfluence={0.7}
+        <N8AO
+          key="n8ao"
+          aoRadius={ssaoRadius * 5}
           intensity={ssaoIntensity}
-          radius={ssaoRadius}
-          color={new THREE.Color(0x000000)}
+          quality="high"
         />
       )
     }
@@ -87,7 +80,6 @@ export default function PostProcessing({
     <EffectComposer
       multisampling={4}
       stencilBuffer={false}
-      disableNormalPass={false}
     >
       {effects}
     </EffectComposer>

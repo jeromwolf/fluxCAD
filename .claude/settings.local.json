@@ -24,7 +24,11 @@
       "Bash(git push:*)",
       "Bash(grep:*)",
       "Bash(rm:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npm run build:*)",
+      "Bash(node:*)",
+      "Bash(./stop-collaboration.sh:*)",
+      "Bash(true)"
     ],
     "deny": []
   }

@@ -11,6 +11,10 @@ interface SnapSettings {
 export type MeasurementMode = 'none' | 'distance' | 'angle'
 
 interface AppState {
+  // 협업 모드 설정
+  collaborationEnabled: boolean
+  setCollaborationEnabled: (enabled: boolean) => void
+  
   // CAD 모드 여부
   useCAD: boolean
   setUseCAD: (useCAD: boolean) => void
@@ -41,6 +45,10 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
+  // 협업 모드 - 기본값 false
+  collaborationEnabled: false,
+  setCollaborationEnabled: (enabled) => set({ collaborationEnabled: enabled }),
+  
   useCAD: false, // 임시로 CAD 모드 비활성화
   setUseCAD: (useCAD) => set({ useCAD }),
   

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useThree } from '@react-three/fiber'
 import { Environment, ContactShadows, Sky } from '@react-three/drei'
-import { useControls, folder } from 'leva'
 
 // HDR 환경 맵 미리 설정된 프리셋
 const environmentPresets = {
@@ -140,45 +139,15 @@ export default function LightingSystem({
   )
 }
 
-// 조명 제어 패널 컴포넌트
+// 조명 제어 패널 컴포넌트 (Leva 없이 간소화)
 export function LightingControls() {
-  const { scene, gl } = useThree()
-  const [currentPreset, setCurrentPreset] = useState<keyof typeof environmentPresets>('studio')
+  const { gl } = useThree()
+  const [currentPreset] = useState<keyof typeof environmentPresets>('studio')
   
-  const {
-    environmentIntensity,
-    ambientIntensity,
-    keyLightIntensity,
-    fillLightIntensity,
-    rimLightIntensity,
-    exposure,
-    enableShadows,
-    shadowOpacity
-  } = useControls('조명', {
-    환경맵: folder({
-      preset: {
-        value: currentPreset,
-        options: Object.keys(environmentPresets).reduce((acc, key) => {
-          acc[environmentPresets[key as keyof typeof environmentPresets].name] = key
-          return acc
-        }, {} as Record<string, string>)
-      },
-      environmentIntensity: { value: 1.0, min: 0, max: 3, step: 0.1 }
-    }),
-    주요조명: folder({
-      ambientIntensity: { value: 0.4, min: 0, max: 2, step: 0.1 },
-      keyLightIntensity: { value: 1.0, min: 0, max: 3, step: 0.1 },
-      fillLightIntensity: { value: 0.3, min: 0, max: 2, step: 0.1 },
-      rimLightIntensity: { value: 0.2, min: 0, max: 2, step: 0.1 }
-    }),
-    후처리: folder({
-      exposure: { value: 1.0, min: 0.1, max: 3, step: 0.1 }
-    }),
-    그림자: folder({
-      enableShadows: { value: true },
-      shadowOpacity: { value: 0.4, min: 0, max: 1, step: 0.1 }
-    })
-  })
+  // 기본값 사용
+  const environmentIntensity = 1.0
+  const exposure = 1.0
+  const enableShadows = true
   
   // 노출값 적용
   useEffect(() => {

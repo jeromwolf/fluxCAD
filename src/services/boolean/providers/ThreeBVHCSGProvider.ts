@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Evaluator, Operation } from 'three-bvh-csg'
+import { Evaluator, Brush, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg'
 import { BooleanOperationType, BooleanOperationProvider, BooleanOperationResult } from '@/types/boolean'
 
 // Three-BVH-CSG를 사용한 실제 Boolean 연산 프로바이더
@@ -21,35 +21,35 @@ export class ThreeBVHCSGProvider implements BooleanOperationProvider {
     operation: BooleanOperationType
   ): Promise<BooleanOperationResult> {
     try {
-      // 지오메트리를 Mesh로 변환
-      const meshA = new THREE.Mesh(geometryA.clone())
-      const meshB = new THREE.Mesh(geometryB.clone())
+      // 지오메트리를 Brush로 변환
+      const brushA = new Brush(geometryA.clone())
+      const brushB = new Brush(geometryB.clone())
 
       // CSG 연산 타입 매핑
-      let csgOperation: Operation
+      let csgOperation: number
       switch (operation) {
         case 'union':
-          csgOperation = Operation.UNION
+          csgOperation = ADDITION
           break
         case 'subtract':
-          csgOperation = Operation.SUBTRACT
+          csgOperation = SUBTRACTION
           break
         case 'intersect':
-          csgOperation = Operation.INTERSECTION
+          csgOperation = INTERSECTION
           break
         default:
           throw new Error(`Unknown operation: ${operation}`)
       }
 
       // Boolean 연산 수행
-      const resultMesh = this.evaluator.evaluate(meshA, meshB, csgOperation)
+      const resultBrush = this.evaluator.evaluate(brushA, brushB, csgOperation) as any
       
-      if (!resultMesh || !resultMesh.geometry) {
+      if (!resultBrush || !resultBrush.geometry) {
         throw new Error('Boolean operation resulted in empty geometry')
       }
 
       // 결과 지오메트리 정리
-      const resultGeometry = resultMesh.geometry
+      const resultGeometry = resultBrush.geometry
       resultGeometry.computeVertexNormals()
       resultGeometry.computeBoundingBox()
       resultGeometry.computeBoundingSphere()
